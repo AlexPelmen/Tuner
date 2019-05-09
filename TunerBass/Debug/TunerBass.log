@@ -1,0 +1,7 @@
+﻿  main.cpp
+c:\users\pelmen\source\repos\tunerbass\tunerbass\graph.h(18): warning C4305: инициализация: усечение из "double" в "float"
+c:\users\pelmen\source\repos\tunerbass\tunerbass\buffer.h(27): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\buffer.h(38): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(62): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(69): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+  TunerBass.vcxproj -> C:\Users\Pelmen\source\repos\TunerBass\Debug\TunerBass.exe
