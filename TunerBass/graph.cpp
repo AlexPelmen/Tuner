@@ -20,14 +20,21 @@ GraphConsole::GraphConsole() {
 	//Pen and brush
 	WhitePen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
 	BlackBrush = CreateSolidBrush(RGB(0, 0, 0));
+
+	scale = asio_buffer_length / width;
 };
+
+void GraphConsole::set_asio_buffer_length(int buffer_length) {
+	asio_buffer_length = buffer_length;
+	scale = (float)width/ asio_buffer_length;
+}
 
 
 void GraphConsole::draw_axis() {
 	SelectObject(hDC, WhitePen);
 	//Horizontal
 	MoveToEx(hDC, centerX, centerY, NULL);
-	LineTo(hDC, width, centerY);
+	LineTo(hDC, width + paddingX - 1, centerY);
 	//Vertical
 	MoveToEx(hDC, centerX, centerY, NULL);
 	LineTo(hDC, centerX, centerY - height / 2);
@@ -56,15 +63,13 @@ void GraphConsole::draw_new_point(float x, float y) {
 
 //output sample to the graph
 void GraphConsole::draw_sample(int * sample, int offset ){
-	/*int* p = sample;
-	for (int i = 0; i < asio_buffer_length; i++) 
-		draw_new_point(i + offset, *p++);*/
-
+	if (!sample) return;
 	int* p = sample;
-	int avr = 0;
-	for (int i = 0; i < asio_buffer_length/4; i++) {
-		int num = *p;
-		avr = (avr + *p++) / 2;
+	int x = 0;
+	for (int i = 0; i < asio_buffer_length; i++) {
+		draw_new_point(x++ + offset * asio_buffer_length, *p++);
+		if (x*scale > width)
+			break;
 	}
-	draw_new_point(offset, avr );
 };
+

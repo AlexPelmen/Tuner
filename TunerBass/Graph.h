@@ -14,8 +14,7 @@ public:
 	int centerX;
 	int centerY;
 
-	float step;					//offset between two points till X axis
-	float scale = 0.1;			//scale the graph
+	float scale = 1;			//scale the graph
 	int asio_buffer_length;		//buffer length
 	
 	//handles
@@ -26,9 +25,10 @@ public:
 	HBRUSH BlackBrush;			//black brush (background)
 
 	GraphConsole();				//constructor
-	
+
+	void set_asio_buffer_length(int buffer_length);
 	void clear();				//paint it black
 	void draw_axis();			//draw coordinate plane					
 	void draw_new_point(float x, float y);		//add new point to the graph
-	void draw_sample(int* sample, int offset );	//output sample to the graph	
+	void draw_sample(int* sample, int offset);	//output sample to the graph
 };
