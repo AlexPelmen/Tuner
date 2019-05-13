@@ -1,6 +1,6 @@
 /*
 	BASS simple console player
-	Copyright (c) 1999-2017 Un4seen Developments Ltd.
+	Copyright (c) 1999-2019 Un4seen Developments Ltd.
 */
 
 #include <stdlib.h>
@@ -47,7 +47,7 @@ void ListDevices()
 {
 	BASS_DEVICEINFO di;
 	int a;
-	for (a=1;BASS_GetDeviceInfo(a,&di);a++) {
+	for (a=0;BASS_GetDeviceInfo(a,&di);a++) {
 		if (di.flags&BASS_DEVICE_ENABLED) // enabled output device
 			printf("dev %d: %s\n",a,di.name);
 	}

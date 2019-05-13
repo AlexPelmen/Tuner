@@ -120,9 +120,13 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Bassasio\c\bassasio.lib" />
+    <Library Include="..\Bassmix\c\bassmix.lib">
+      <DeploymentContent>false</DeploymentContent>
+    </Library>
     <Library Include="..\Bass\c\bass.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Bass\c\bass.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Graph.h" />
   </ItemGroup>

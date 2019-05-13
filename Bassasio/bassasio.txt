@@ -1,5 +1,5 @@
-BASSASIO 1.3
-Copyright (c) 2005-2014 Un4seen Developments Ltd. All rights reserved.
+BASSASIO 1.4
+Copyright (c) 2005-2019 Un4seen Developments Ltd. All rights reserved.
 
 Files that you should have found in the BASSASIO package
 ========================================================
@@ -109,12 +109,14 @@ VB\             Visual Basic API and examples...
     PRJMULTI.VBP
     PRJMULTI.FRM
     PRJDEVICE.FRM
-    MODMULTI.BAS
 
 NOTE: You may need to "Unblock" the BASSASIO.CHM file in its "Properties" to
       view it on Windows 7. The documentation can also be viewed online at
       the BASSASIO website.
 
+NOTE: The Delphi and VB examples may not always be up to date with the C
+      examples, so the latter should be preferred as references if possible.
+      
 NOTE: To run the example EXEs, first you will have to copy BASSASIO.DLL into
       the same directory as them. You will also need BASS.DLL, which can be
       download from the BASS website. BASSDSD.DLL is also required by the
@@ -255,6 +257,30 @@ These are the major (and not so major) changes at each version stage.
 There are of course bug fixes and other little improvements made along
 the way too! To make upgrading simpler, all functions affected by a
 change to the BASS interface are listed.
+
+1.4 - 7/5/2019
+--------------
+* First available device initialization option
+	BASS_ASIO_Init
+* BASS channel support
+	BASS_ASIO_ChannelEnableBASS
+	CONTEST/DSDTEST/DSPTEST/LIVEFX/MULTI/SPEAKERS examples updated
+* RMS level retrieval
+	BASS_ASIO_LEVEL_RMS (BASS_ASIO_ChannelGetLevel flag)
+* Volume changes are ramped
+	BASS_ASIO_ChannelSetVolume
+* Dither when converting from floating-point to integer
+	BASS_ASIO_FORMAT_DITHER (BASS_ASIO_ChannelSetFormat flag)
+* Pausing of all input or output channels at once
+	BASS_ASIO_ChannelPause
+* Device locking to prevent access by other threads
+	BASS_ASIO_Lock
+* Resetting of joined channels' settings
+	BASS_ASIO_RESET_JOINED (BASS_ASIO_ChannelReset flag)
+* All input channels are processed before any output channels when multiple threads are enabled
+	BASS_ASIO_Start
+* Negative return values from ASIO channel callbacks are treated as 0
+	ASIOPROC
 
 1.3.1 - 17/12/2014
 ------------------

@@ -1,6 +1,6 @@
 /*
 	BASS recording example
-	Copyright (c) 2002-2017 Un4seen Developments Ltd.
+	Copyright (c) 2002-2019 Un4seen Developments Ltd.
 */
 
 #include <windows.h>
@@ -15,11 +15,9 @@ HWND win=NULL;
 #define CHANS 2
 #define BUFSTEP 200000	// memory allocation unit
 
-int device;				// current input source
 int input;				// current input source
 BYTE *recbuf=NULL;		// recording buffer
 DWORD reclen;			// recording length
-
 HRECORD rchan=0;		// recording channel
 HSTREAM chan=0;			// playback channel
 
@@ -56,11 +54,6 @@ BOOL CALLBACK RecordingCallback(HRECORD handle, const void *buffer, DWORD length
 	return TRUE; // continue recording
 }
 
-void CALLBACK FreeSyncProc(HSYNC handle, DWORD channel, DWORD data, void *user)
-{
-	StopRecording();
-}
-
 void StartRecording()
 {
 	WAVEFORMATEX *wf;
@@ -71,8 +64,6 @@ void StartRecording()
 		recbuf=NULL;
 		EnableWindow(DLGITEM(11),FALSE);
 		EnableWindow(DLGITEM(12),FALSE);
-		// close output device before recording incase of half-duplex device
-		BASS_Free();
 	}
 	// allocate initial buffer and make space for WAVE header
 	recbuf=malloc(BUFSTEP);
@@ -90,13 +81,11 @@ void StartRecording()
 	// start recording
 	rchan=BASS_RecordStart(FREQ,CHANS,0,RecordingCallback,0);
 	if (!rchan) {
-		Error("Couldn't start recording");
+		Error("Can't start recording");
 		free(recbuf);
 		recbuf=0;
 		return;
 	}
-	// set a sync to detect the recording stopping by itself, eg. device unplugged
-	BASS_ChannelSetSync(rchan,BASS_SYNC_FREE,0,FreeSyncProc,0);
 	MESS(10,WM_SETTEXT,0,"Stop");
 }
 
@@ -110,16 +99,9 @@ void StopRecording()
 	*(DWORD*)(recbuf+40)=reclen-44;
 	// enable "save" button
 	EnableWindow(DLGITEM(12),TRUE);
-	// setup output device (using default device)
-	if (!BASS_Init(-1,FREQ,0,win,NULL)) {
-		Error("Can't initialize output device");
-		return;
-	}
 	// create a stream from the recording
 	if (chan=BASS_StreamCreateFile(TRUE,recbuf,0,reclen,0))
 		EnableWindow(DLGITEM(11),TRUE); // enable "play" button
-	else 
-		BASS_Free();
 }
 
 // write the recorded data to disk
@@ -150,8 +132,8 @@ void UpdateInputInfo()
 	float level;
 	int it=BASS_RecordGetInput(input,&level); // get info on the input
 	if (it==-1 || level<0) { // failed to get level
-		BASS_RecordGetInput(-1,&level); // try master input instead
-		if (level<0) { // that failed too
+		it=BASS_RecordGetInput(-1,&level); // try master input instead
+		if (it==-1 || level<0) { // that failed too
 			level=1; // just display 100%
 			EnableWindow(DLGITEM(14),FALSE);
 		} else
@@ -192,6 +174,12 @@ void UpdateInputInfo()
 			break;
 		default:
 			type="undefined";
+			{
+				// check if it's a loopback device
+				BASS_DEVICEINFO info;
+				BASS_RecordGetDeviceInfo(BASS_RecordGetDevice(),&info);
+				if (info.flags&BASS_DEVICE_LOOPBACK) type="loopback";
+			}
 	}
 	MESS(15,WM_SETTEXT,0,type); // display the type
 }
@@ -208,14 +196,15 @@ BOOL InitDevice(int device)
 		int c;
 		const char *i;
 		MESS(13,CB_RESETCONTENT,0,0);
+		input=0;
 		for (c=0;i=BASS_RecordGetInputName(c);c++) {
 			MESS(13,CB_ADDSTRING,0,i);
 			if (!(BASS_RecordGetInput(c,NULL)&BASS_INPUT_OFF)) { // this one is currently "on"
 				input=c;
 				MESS(13,CB_SETCURSEL,input,0);
-				UpdateInputInfo();
 			}
 		}
+		UpdateInputInfo();
 	}
 	return TRUE;
 }
@@ -226,9 +215,14 @@ INT_PTR CALLBACK dialogproc(HWND h,UINT m,WPARAM w,LPARAM l)
 		case WM_TIMER:
 			{ // update the recording/playback counter
 				char text[30]="";
-				if (rchan) // recording
+				if (rchan) { // recording
+					if (rchan!=1 && !BASS_ChannelIsActive(rchan)) { // the recording has stopped, eg. unplugged device
+						StopRecording();
+						Error("The recording stopped");
+						break;
+					}
 					sprintf(text,"%d",reclen-44);
-				else if (chan) {
+				} else if (chan) {
 					if (BASS_ChannelIsActive(chan)) // playing
 						sprintf(text,"%I64d / %I64d",BASS_ChannelGetPosition(chan,BASS_POS_BYTE),BASS_ChannelGetLength(chan,BASS_POS_BYTE));
 					else
@@ -268,16 +262,15 @@ INT_PTR CALLBACK dialogproc(HWND h,UINT m,WPARAM w,LPARAM l)
 				case 16:
 					if (HIWORD(w)==CBN_SELCHANGE) { // device selection changed
 						int i=MESS(16,CB_GETCURSEL,0,0); // get the selection
+						if (rchan) rchan=1; // special handle (real handles always have highest bit set) to prevent timer ending the recording
 						// initialize the selected device
 						if (InitDevice(i)) {
 							if (rchan) { // continue recording on the new device...
-								HRECORD newrchan=BASS_RecordStart(FREQ,CHANS,0,RecordingCallback,0);
+								HRECORD newrchan=BASS_RecordStart(FREQ,CHANS,0,RecordingCallback,NULL);
 								if (!newrchan)
 									Error("Couldn't start recording");
-								else {
+								else
 									rchan=newrchan;
-									BASS_ChannelSetSync(rchan,BASS_SYNC_FREE,0,FreeSyncProc,0);
-								}
 							}
 						}
 					}
@@ -308,6 +301,9 @@ INT_PTR CALLBACK dialogproc(HWND h,UINT m,WPARAM w,LPARAM l)
 				}
 				InitDevice(def); // initialize default recording device
 			}
+			// initialize default output device
+			if (!BASS_Init(-1,FREQ,0,win,NULL))
+				Error("Can't initialize output device");
 			SetTimer(h,0,200,0); // timer to update the position display
 			return 1;
 

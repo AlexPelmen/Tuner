@@ -29,12 +29,18 @@
     <Library Include="..\Bassasio\c\bassasio.lib">
       <Filter>Файлы ресурсов</Filter>
     </Library>
+    <Library Include="..\Bassmix\c\bassmix.lib">
+      <Filter>Файлы ресурсов</Filter>
+    </Library>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Buffer.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bass\c\bass.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

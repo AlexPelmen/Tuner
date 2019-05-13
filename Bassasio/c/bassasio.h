@@ -1,6 +1,6 @@
 /*
 	BASSASIO 1.4 C/C++ header file
-	Copyright (c) 2005-2014 Un4seen Developments Ltd.
+	Copyright (c) 2005-2019 Un4seen Developments Ltd.
 
 	See the BASSASIO.CHM file for more detailed documentation
 */
@@ -18,12 +18,13 @@ extern "C" {
 #define BASSASIODEF(f) WINAPI f
 #endif
 
-#define BASSASIOVERSION 0x103	// API version
+#define BASSASIOVERSION 0x104	// API version
 
 // error codes returned by BASS_ASIO_ErrorGetCode
 #define BASS_OK				0	// all is OK
 #define BASS_ERROR_FILEOPEN	2	// can't open the file
 #define BASS_ERROR_DRIVER	3	// can't find a free/valid driver
+#define BASS_ERROR_HANDLE	5	// invalid handle
 #define BASS_ERROR_FORMAT	6	// unsupported sample format
 #define BASS_ERROR_INIT		8	// BASS_ASIO_Init has not been successfully called
 #define BASS_ERROR_START	9	// BASS_ASIO_Start has/hasn't been called
@@ -69,6 +70,7 @@ typedef struct {
 #define BASS_ASIO_FORMAT_FLOAT		19 // 32-bit floating-point
 #define BASS_ASIO_FORMAT_DSD_LSB	32 // DSD (LSB 1st)
 #define BASS_ASIO_FORMAT_DSD_MSB	33 // DSD (MSB 1st)
+#define BASS_ASIO_FORMAT_DITHER		0x100 // flag: apply dither when converting from floating-point to integer
 
 // BASS_ASIO_ChannelReset flags
 #define BASS_ASIO_RESET_ENABLE	1 // disable channel
@@ -77,6 +79,7 @@ typedef struct {
 #define BASS_ASIO_RESET_FORMAT	8 // reset sample format to native format
 #define BASS_ASIO_RESET_RATE	16 // reset sample rate to device rate
 #define BASS_ASIO_RESET_VOLUME	32 // reset volume to 1.0
+#define BASS_ASIO_RESET_JOINED	0x10000 // apply to joined channels too
 
 // BASS_ASIO_ChannelIsActive return values
 #define BASS_ASIO_ACTIVE_DISABLED	0
@@ -101,6 +104,9 @@ user   : The 'user' parameter given when calling BASS_ASIO_SetNotify */
 #define BASS_ASIO_NOTIFY_RATE	1 // sample rate change
 #define BASS_ASIO_NOTIFY_RESET	2 // reset (reinitialization) request
 
+// BASS_ASIO_ChannelGetLevel flags
+#define BASS_ASIO_LEVEL_RMS		0x1000000
+
 DWORD BASSASIODEF(BASS_ASIO_GetVersion)();
 BOOL BASSASIODEF(BASS_ASIO_SetUnicode)(BOOL unicode);
 DWORD BASSASIODEF(BASS_ASIO_ErrorGetCode)();
@@ -108,8 +114,9 @@ BOOL BASSASIODEF(BASS_ASIO_GetDeviceInfo)(DWORD device, BASS_ASIO_DEVICEINFO *in
 DWORD BASSASIODEF(BASS_ASIO_AddDevice)(const GUID *clsid, const char *driver, const char *name);
 BOOL BASSASIODEF(BASS_ASIO_SetDevice)(DWORD device);
 DWORD BASSASIODEF(BASS_ASIO_GetDevice)();
-BOOL BASSASIODEF(BASS_ASIO_Init)(DWORD device, DWORD flags);
+BOOL BASSASIODEF(BASS_ASIO_Init)(int device, DWORD flags);
 BOOL BASSASIODEF(BASS_ASIO_Free)();
+BOOL BASSASIODEF(BASS_ASIO_Lock)(BOOL lock);
 BOOL BASSASIODEF(BASS_ASIO_SetNotify)(ASIONOTIFYPROC *proc, void *user);
 BOOL BASSASIODEF(BASS_ASIO_ControlPanel)();
 BOOL BASSASIODEF(BASS_ASIO_GetInfo)(BASS_ASIO_INFO *info);
@@ -129,6 +136,7 @@ BOOL BASSASIODEF(BASS_ASIO_ChannelGetInfo)(BOOL input, DWORD channel, BASS_ASIO_
 BOOL BASSASIODEF(BASS_ASIO_ChannelReset)(BOOL input, int channel, DWORD flags);
 BOOL BASSASIODEF(BASS_ASIO_ChannelEnable)(BOOL input, DWORD channel, ASIOPROC *proc, void *user);
 BOOL BASSASIODEF(BASS_ASIO_ChannelEnableMirror)(DWORD channel, BOOL input2, DWORD channel2);
+BOOL BASSASIODEF(BASS_ASIO_ChannelEnableBASS)(BOOL input, DWORD channel, DWORD handle, BOOL join);
 BOOL BASSASIODEF(BASS_ASIO_ChannelJoin)(BOOL input, DWORD channel, int channel2);
 BOOL BASSASIODEF(BASS_ASIO_ChannelPause)(BOOL input, DWORD channel);
 DWORD BASSASIODEF(BASS_ASIO_ChannelIsActive)(BOOL input, DWORD channel);
