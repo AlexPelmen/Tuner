@@ -11,13 +11,12 @@
 using namespace std;
 
 void *c_buffer;				//common buffer
-HSAMPLE c_sample;			//common sample
-BOOL err = FALSE;			//error flag
 GraphConsole *Graph = new GraphConsole;	
 BOOL VISUALIZE = TRUE;		//visualize or not
 BASS_ASIO_INFO info;		//info about settings of driver
 
-HSTREAM common_stream;		//!!!
+HSTREAM left_channel_stream;	//left headphone
+HSTREAM right_channel_stream;	//right headphone
 
 
 //output info
@@ -40,7 +39,7 @@ void visualization(){
 	while (VISUALIZE) {
 		Graph->clear();				//paint it black
 		Graph->draw_axis();			//draw coordinate plane	
-		Graph->draw_sample((int*)c_buffer, 0 );
+		Graph->draw_sample((float*)c_buffer, 0 );
 		this_thread::sleep_for(chrono::milliseconds(44));
 	}
 	return;
@@ -49,20 +48,15 @@ void visualization(){
 
 //CALLBACKS
 DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, void *user){
-	BASS_StreamPutData( common_stream, buffer, length);
+	BASS_StreamPutData( left_channel_stream, buffer, length);
+	BASS_StreamPutData( right_channel_stream, buffer, length);
 	c_buffer = buffer;
 	return length;
 }
-DWORD CALLBACK outputProc(BOOL input, DWORD channel, void *buffer, DWORD length, void *user) {
-	memcpy_s(buffer, length, c_buffer, length);
-	return length;
-}
-
 
 void main() {		
-	setlocale(LC_ALL, "Rus");
-	
-	if (!BASS_Init(-1, 44100, 0, 0, NULL)) {
+	setlocale(LC_ALL, "Rus");	
+	if ( ! BASS_Init(-1, 44100, 0, 0, NULL)) {
 		cout << "BASS ERROR: " << BASS_ErrorGetCode() << endl;
 		system("pause");
 		return;
@@ -73,40 +67,28 @@ void main() {
 		return;
 	}	
 	BASS_ASIO_GetInfo(&info);
-	Graph->set_asio_buffer_length( info.bufpref );	
-	cout << BASS_ErrorGetCode() << endl;
+	Graph->set_asio_buffer_length( (int)info.bufpref/1.5 );	//div to 1.5 cause of strage things with buffer	
 
-	//set callbacks	
-	/*BASS_ASIO_ChannelEnable( TRUE, 0, inputProc, 0 );
-	BASS_ASIO_ChannelEnable( FALSE, 0, outputProc, 0);
-	BASS_ASIO_ChannelEnable( FALSE, 1, outputProc, 0);*/
-
-	cout << "Before all: " << BASS_ErrorGetCode() << endl;
-	//HSTREAM stream_to_file = BASS_StreamCreateFile( 0, "C:/Users/Pelmen/Desktop/Rosemary.mp3", 0, 0, BASS_STREAM_DECODE);
-	common_stream = BASS_StreamCreate(BASS_ASIO_GetRate(), 2, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0 );
-	cout << "Stream created: " << BASS_ErrorGetCode() << endl;
+	//set streams 
+	left_channel_stream = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0 );
+	right_channel_stream = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0 );
 	
 	//outout channels
-	BASS_ASIO_ChannelEnableBASS(FALSE, 0, common_stream, TRUE);
+	BASS_ASIO_ChannelEnableBASS(FALSE, 0, left_channel_stream, TRUE);
+	BASS_ASIO_ChannelEnableBASS(FALSE, 1, right_channel_stream, TRUE);
 	BASS_ASIO_ChannelSetFormat(FALSE, 0, BASS_ASIO_FORMAT_FLOAT);
 	BASS_ASIO_ChannelSetFormat(FALSE, 1, BASS_ASIO_FORMAT_FLOAT);
-	cout << "Output channel: " << BASS_ASIO_ErrorGetCode() << endl;
 
 	//input channel
 	BASS_ASIO_ChannelEnable(TRUE, 0, inputProc, 0);
 	BASS_ASIO_ChannelSetFormat(TRUE, 0, BASS_ASIO_FORMAT_FLOAT);
 
-
-	/*BASS_ASIO_ChannelEnableBASS(FALSE, 0, mixer, TRUE);
-	cout << BASS_ErrorGetCode() << endl;
-	BASS_ChannelPlay(mixer, 0);*/
-
 	BASS_ASIO_Start(0, 0);	//start driver
-	//thread visualizationTread(visualization);	//visualization in new thread
+	thread visualizationTread(visualization);	//visualization in new thread
 
 	system("pause");
 	VISUALIZE = FALSE;		//kill the visualization thread
-	//visualizationTread.join();
+	visualizationTread.join();
 	BASS_ASIO_Stop();		//stop asio and free buffers
 	BASS_ASIO_Free();
 	return;

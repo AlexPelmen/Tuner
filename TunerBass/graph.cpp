@@ -49,8 +49,8 @@ void GraphConsole::clear() {
 
 void GraphConsole::draw_new_point(float x, float y) {
 	SelectObject(hDC, WhitePen);
-	float relVal = y / (float)INT_MAX / 2;	//normalize
-	int Y = round(height * relVal );		//get val
+	float relVal = y / 2;	//it normalized yet
+	int Y = round(height * relVal ); //get val
 
 	//to absolute coords;
 	int X = x * scale  + centerX;
@@ -62,9 +62,9 @@ void GraphConsole::draw_new_point(float x, float y) {
 
 
 //output sample to the graph
-void GraphConsole::draw_sample(int * sample, int offset ){
+void GraphConsole::draw_sample(float * sample, int offset ){
 	if (!sample) return;
-	int* p = sample;
+	float* p = sample;
 	int x = 0;
 	for (int i = 0; i < asio_buffer_length; i++) {
 		draw_new_point(x++ + offset * asio_buffer_length, *p++);
