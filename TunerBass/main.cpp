@@ -11,7 +11,9 @@
 using namespace std;
 
 void *c_buffer;				//common buffer
-GraphConsole *Graph = new GraphConsole;	
+void *c_freq_res;			//frequency response
+GraphConsole *Graph = new GraphConsole(	0, 0, 600, 300,	20,	20,	0 );	
+GraphConsole *FreqResGraph = new GraphConsole(0, 300, 600, 300, 20, 20, 0);
 BOOL VISUALIZE = TRUE;		//visualize or not
 BASS_ASIO_INFO info;		//info about settings of driver
 
@@ -33,13 +35,32 @@ void outputAsioInfo(BASS_ASIO_INFO *info) {
 	cout << "Rate: " << BASS_ASIO_GetRate() << endl;
 }
 
+void GraphInit(){
+	//resize window
+	HWND hwnd;
+	char Title[1024];
+	GetConsoleTitle(Title, 1024);
+	hwnd = FindWindow(NULL, Title); 
+	MoveWindow(hwnd, 0, 0, 620, 600, TRUE); 
+
+	Graph->set_asio_buffer_length( (int)info.bufpref*0.80 );
+	FreqResGraph->set_asio_buffer_length( 512 );
+}
+
 
 //Thread to output the graph
 void visualization(){
 	while (VISUALIZE) {
+		//signal's graph 
 		Graph->clear();				//paint it black
 		Graph->draw_axis();			//draw coordinate plane	
 		Graph->draw_sample((float*)c_buffer, 0 );
+				
+		//frequency response graph
+		FreqResGraph->clear();
+		FreqResGraph->draw_axis();
+		FreqResGraph->draw_sample((float*)c_freq_res, 0);
+
 		this_thread::sleep_for(chrono::milliseconds(44));
 	}
 	return;
@@ -51,6 +72,9 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 	BASS_StreamPutData( left_channel_stream, buffer, length);
 	BASS_StreamPutData( right_channel_stream, buffer, length);
 	c_buffer = buffer;
+	if (!c_freq_res)
+		c_freq_res = new float[length];
+	BASS_ChannelGetData(left_channel_stream, c_freq_res, BASS_DATA_FFT1024);
 	return length;
 }
 
@@ -66,8 +90,9 @@ void main() {
 		system("pause");
 		return;
 	}	
+
 	BASS_ASIO_GetInfo(&info);
-	Graph->set_asio_buffer_length( (int)info.bufpref/1.5 );	//div to 1.5 cause of strage things with buffer	
+	GraphInit();	//init graph's settings	
 
 	//set streams 
 	left_channel_stream = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0 );

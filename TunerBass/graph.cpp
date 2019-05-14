@@ -4,53 +4,65 @@
 
 using namespace std;
 
-GraphConsole::GraphConsole() {
+GraphConsole::GraphConsole( int x, int y, int width, int height, int padding_x, int padding_y, int buffer_length ) {
 	
-	//Handles
-	hWnd = GetConsoleWindow();
-	GetClientRect(hWnd, &wndRect );
-	hDC = GetDC( hWnd );
+	GraphConsole::offset_x = x;
+	GraphConsole::offset_y = y;
+	GraphConsole::padding_x = padding_x;
+	GraphConsole::padding_y = padding_y;
+	GraphConsole::width = width;
+	GraphConsole::height = height;
+	GraphConsole::asio_buffer_length = buffer_length;
 
-	//params	
-	width = wndRect.right - wndRect.left - paddingX * 2;
-	height = wndRect.bottom - wndRect.top - paddingY * 2;
-	centerX = paddingX;
-	centerY = paddingY + height / 2;
+	client_width = width - padding_x * 2;
+	client_height = height - padding_y * 2;
+	centerX = offset_x + padding_x;
+	centerY = offset_y + padding_y + client_height / 2;
 	
 	//Pen and brush
 	WhitePen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
 	BlackBrush = CreateSolidBrush(RGB(0, 0, 0));
 
-	scale = asio_buffer_length / width;
+	//handles
+	hWnd = GetConsoleWindow();
+	hDC = GetDC( hWnd );
+
+	scale = asio_buffer_length / client_width;
 };
 
 void GraphConsole::set_asio_buffer_length(int buffer_length) {
 	asio_buffer_length = buffer_length;
-	scale = (float)width/ asio_buffer_length;
+	scale = (float) client_width / asio_buffer_length;
 }
 
 
 void GraphConsole::draw_axis() {
 	SelectObject(hDC, WhitePen);
 	//Horizontal
-	MoveToEx(hDC, centerX, centerY, NULL);
-	LineTo(hDC, width + paddingX - 1, centerY);
+	MoveToEx(hDC, centerX, centerY, NULL);	//left point
+	LineTo(hDC, offset_x + padding_x + client_width - 1, centerY );	//right point
 	//Vertical
 	MoveToEx(hDC, centerX, centerY, NULL);
-	LineTo(hDC, centerX, centerY - height / 2);
+	LineTo(hDC, centerX, centerY - client_height / 2);
 	MoveToEx(hDC, centerX, centerY, NULL);
-	LineTo(hDC, centerX, centerY + height / 2);
+	LineTo(hDC, centerX, centerY + client_height / 2);
 };
 
 void GraphConsole::clear() {
 	SelectObject(hDC, BlackBrush);
-	Rectangle(hDC, paddingX, paddingY, wndRect.right - paddingX, wndRect.bottom - paddingY + 1 );
+	Rectangle(
+		hDC,	//handle to DC
+		offset_x + padding_x, //left side of the box
+		offset_y + padding_y, //top side of the box
+		offset_x + width - padding_x,		//right side of the box 
+		offset_y + height - padding_y + 1	//bottom side of the box
+	);
 };
 
 void GraphConsole::draw_new_point(float x, float y) {
 	SelectObject(hDC, WhitePen);
 	float relVal = y / 2;	//it normalized yet
-	int Y = round(height * relVal ); //get val
+	int Y = round( client_height * relVal ); //get val
 
 	//to absolute coords;
 	int X = x * scale  + centerX;
@@ -68,7 +80,7 @@ void GraphConsole::draw_sample(float * sample, int offset ){
 	int x = 0;
 	for (int i = 0; i < asio_buffer_length; i++) {
 		draw_new_point(x++ + offset * asio_buffer_length, *p++);
-		if (x*scale > width)
+		if (x*scale > client_width )
 			break;
 	}
 };
