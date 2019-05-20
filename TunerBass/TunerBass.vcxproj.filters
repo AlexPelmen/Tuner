@@ -21,6 +21,9 @@
     <ClCompile Include="graph.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="fft.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Bass\c\bass.lib">
@@ -32,6 +35,9 @@
     <Library Include="..\Bassmix\c\bassmix.lib">
       <Filter>Файлы ресурсов</Filter>
     </Library>
+    <Library Include="..\FFTW\libfftw3-3.lib">
+      <Filter>Файлы ресурсов</Filter>
+    </Library>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">
@@ -41,6 +47,15 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="..\Bass\c\bass.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Analize.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FFTW\fftw3.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="fft.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

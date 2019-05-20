@@ -79,7 +79,8 @@ void GraphConsole::draw_sample(float * sample, int offset ){
 	float* p = sample;
 	int x = 0;
 	for (int i = 0; i < asio_buffer_length; i++) {
-		draw_new_point(x++ + offset * asio_buffer_length, *p++);
+		float val = *p++;
+		draw_new_point(x++ + offset * asio_buffer_length, val);
 		if (x*scale > client_width )
 			break;
 	}

@@ -76,7 +76,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Pelmen\source\repos\TunerBass\FFTW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Pelmen\source\repos\TunerBass\FFTW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -115,6 +120,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="fft.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -124,10 +130,14 @@
       <DeploymentContent>false</DeploymentContent>
     </Library>
     <Library Include="..\Bass\c\bass.lib" />
+    <Library Include="..\FFTW\libfftw3-3.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Bass\c\bass.h" />
+    <ClInclude Include="..\FFTW\fftw3.h" />
+    <ClInclude Include="Analize.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="fft.h" />
     <ClInclude Include="Graph.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
