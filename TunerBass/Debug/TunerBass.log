@@ -1,12 +1,11 @@
 ﻿  main.cpp
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(56): warning C4244: return: преобразование "float" в "int", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(68): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(75): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(101): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(149): warning C4305: инициализация: усечение из "double" в "float"
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(186): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(203): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(204): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(205): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
-c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(206): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(10): warning C4067: непредвиденные лексемы за директивой препроцессора, требуется newline
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(67): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(77): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(127): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(199): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(219): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(220): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(221): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tunerbass\tunerbass\main.cpp(222): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
   TunerBass.vcxproj -> C:\Users\Pelmen\source\repos\TunerBass\Debug\TunerBass.exe
