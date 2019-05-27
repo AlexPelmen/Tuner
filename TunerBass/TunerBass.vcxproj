@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{98F62010-ED03-415E-965E-9D32E5EC30C1}</ProjectGuid>
     <RootNamespace>TunerBass</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -130,9 +130,9 @@
   <ItemGroup>
     <ClInclude Include="..\Bass\c\bass.h" />
     <ClInclude Include="Analize.h" />
-    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Graph_config.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="ProcConfig.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -6,13 +6,9 @@
 #include "Graph.h"
 #include "Buffer.h"
 #include "Analize.h"
+#include "ProcConfig.h"
 
 #include "Graph_config.h";
-
-#define FFT_LEN 8192
-#define VISUALIZATION_PAUSE 44
-#define SIGNAL_GATE_TRASHOLD 0.01
-
 
 using namespace std;
 
@@ -34,7 +30,7 @@ GraphConsole *FreqResGraph = new GraphConsole(
 	FFT_GRAPH_PADDING_Y,
 	FFT_LEN
 );
-BOOL VISUALIZE = TRUE;		//output graphs or not
+
 BASS_ASIO_INFO info;		//info about settings of driver
 
 //STREAMS and appropriate buffers
@@ -96,23 +92,31 @@ void set_notes() {
 *	Not all values would be set up in this array, so
 *	if index is appropriate to NULL value, we use this funtion
 *	to find the nearest note to this index
-*	
 */
+
+//global var for the curent note
+char* curent_note;
+
 char* get_nearest_note(int index) {
 	
 	int up_index = index + 1;
 	int down_index = index - 1;
 	char* note = 0x0000;
+	curent_note = new char[2];
 
 	while (!note) {
-		if (up_index >= 0 && up_index < FFT_LEN - 1)
+		if (up_index < FFT_LEN - 1) {
 			if (noteNameTable[up_index++])
-				note = noteNameTable[up_index];
-			else if (down_index >= 0 && down_index < FFT_LEN - 1)
+				note = noteNameTable[up_index-1];
+			else if (down_index >= 0) {
 				if (noteNameTable[down_index--])
-					note = noteNameTable[down_index];
+					note = noteNameTable[down_index+1];
+			}
+		}
+		else
+			return (char*)"#";
 	}
-	return note;
+	curent_note = note;
 }
 
 
@@ -125,9 +129,26 @@ void GraphInit(){
 	MoveWindow(hwnd, 0, 0, 620, 600, TRUE); 
 
 	Graph->set_asio_buffer_length( (int)info.bufpref*0.80 );	//set buffer length for signal graph
-	Anal->set_buffer_length((int)info.bufpref);					//the same for analizing class
+	Anal->set_buffer_length(FFT_LEN/2);					//the same for analizing class
 }
 
+
+//Thread to process fft
+//read from frequency_responce_buffer fft then returns the name of the note
+void freq_res_proc() {
+	if (frequency_response_buffer) {
+		int index = Anal->get_maximum_index(frequency_response_buffer);
+		char* curent_note = noteNameTable[index];
+		if (!curent_note)				//means that maximum is somewhere between notes
+			get_nearest_note(index);
+
+	}
+	if (curent_note) {
+		system("cls");
+		printf("%s", curent_note);
+	}
+
+}
 
 //Thread to output the graph
 //It works every 
@@ -144,15 +165,8 @@ void visualization(){
 		FreqResGraph->set_asio_buffer_length(FFT_LEN /4);
 		FreqResGraph->draw_sample(frequency_response_buffer, 0 );
 
-		//output name of the note on the screen
-		if (frequency_response_buffer) {
-			system("cls");
-			int index = Anal->get_maximum_index(frequency_response_buffer);
-			char* note = noteNameTable[index];
-			if (!note)
-				note = get_nearest_note(index);
-			cout << note << endl;
-		}
+		thread frequency_response_proc(freq_res_proc);	//fft thread
+		frequency_response_proc.detach();
 
 		//pause
 		this_thread::sleep_for(chrono::milliseconds( VISUALIZATION_PAUSE ));
@@ -180,7 +194,6 @@ void filter_gate(int length) {
 
 
 //CALLBACK
-
 DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, void *user){
 	DWORD fftlen = min( length, 1024 * 2 * 2 ); // limit the data to the amount required by the FFT (1024 samples)
 	BASS_StreamPutData(gate_channel, buffer, fftlen);	//get signal
@@ -233,7 +246,7 @@ void main() {
 
 	BASS_ASIO_Start(0, 0);	//start driver
 	thread visualizationTread(visualization);	//visualization in new thread
-
+	 
 	system("pause");
 	VISUALIZE = FALSE;		//kill the visualization thread
 	visualizationTread.join();
