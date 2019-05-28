@@ -1,30 +1,21 @@
 #pragma once
+#include "ProcConfig.h" 
 
 class Analize {
 public:
-	int asio_buffer_length;
+	Analize() {};
+	Analize(int buffer_length);
+	~Analize() {};
 
-	Analize() {}
-	Analize( int buffer_length ) {
-		asio_buffer_length = buffer_length;
-	}	
-
-	void set_buffer_length( int buffer_length ) {
-		asio_buffer_length = buffer_length;		
-	}
-
-	int get_maximum_index(float* sample) {	
-		if (!asio_buffer_length)	//error
-			return -1;
-
-		float cur_max = 0;
-		int cur_index_of_max = 0;
-		for (int i = 0; i < asio_buffer_length/2; i++) {
-			if (cur_max < sample[i]) {
-				cur_max = sample[i];
-				cur_index_of_max = i;
-			}
-		}
-		return cur_index_of_max;
-	}
+	/*int asio_buffer_length;
+	int sample_rate;*/
+	char* current_note;				//current note playing
+	float freqTable[FFT_LEN];		//array of frequencies as they appropriate fft-spectre
+	char * noteNameTable[FFT_LEN];	//the same as a previews, but array containts names fo the notes
+	float notePitchTable[FFT_LEN];	//array of pitches
+		
+	void init_note_arrays();
+	void set_buffer_length(int buffer_length); 
+	int get_maximum_index(float* sample);
+	char* get_nearest_note(int index);
 };

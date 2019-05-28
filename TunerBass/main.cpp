@@ -30,95 +30,23 @@ GraphConsole *FreqResGraph = new GraphConsole(
 	FFT_GRAPH_PADDING_Y,
 	FFT_LEN
 );
-
-BASS_ASIO_INFO info;		//info about settings of driver
+Analize *Anal = new Analize();	//Analize class...
+BASS_ASIO_INFO info;			//info about settings of driver
 
 //STREAMS and appropriate buffers
-
 HSTREAM left_channel_stream;	//left headphone
 HSTREAM right_channel_stream;	//right headphone
-void *signal_graph_buffer;		//buffer for signal to output it on screen	
+HSTREAM gate_channel;			//for gated signal
+HSTREAM buffer_for_fft;			//process fft with this stream
 
-HSTREAM buffer_for_fft;										//process fft with this stream
-float *frequency_response_buffer = new float[FFT_LEN / 2];	//frequency response buffer
+//Buffers
+void *signal_graph_buffer;										//buffer for signal to output it on screen						
+float *gate_buffer					= new float[FFT_LEN / 2];	//buffer for gated signal
+float *frequency_response_buffer	= new float[FFT_LEN / 2];	//frequency response buffer	
 
-HSTREAM gate_channel;							//for gated signal
-float *gate_buffer = new float[FFT_LEN / 2];	//buffer for gated signal
-
-Analize *Anal = new Analize();	//Analize class...
-
-//Notes
-float freqTable[FFT_LEN];		//array of frequencies as they appropriate fft-spectre
-char * noteNameTable[FFT_LEN];	//the same as a previews, but array containts names fo the notes
-float notePitchTable[FFT_LEN];	//array of pitches
-const char * NOTES[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };	//Names of the notes
-
-
-//this method starts in the init function
-//it's needed to fill array noreNameTable
-void set_notes() {
-
-	//normalize
-	for (int i = 0; i<FFT_LEN; ++i)		
-		freqTable[i] = (BASS_ASIO_GetRate() *i) / (float)(FFT_LEN);
-	
-	//init arrays with default values
-	for (int i = 0; i<FFT_LEN; ++i) {
-		noteNameTable[i] = NULL;
-		notePitchTable[i] = -1;
-	}
-
-	//magic
-	for (int i = 0; i<127; ++i) {
-		float pitch = (440.0 / 32.0) * pow(2, (i - 9.0) / 12.0);
-		if (pitch > BASS_ASIO_GetRate() / 2.0)
-			break;
-		//find the closest frequency using brute force.
-		float min = 1000000000.0;
-		int index = -1;
-		for (int j = 0; j<FFT_LEN; ++j) {
-			if (fabsf(freqTable[j] - pitch) < min) {
-				min = fabsf(freqTable[j] - pitch);
-				index = j;
-			}
-		}
-		noteNameTable[index] = (char*)NOTES[i % 12];
-		notePitchTable[index] = pitch;
-	}
-}
-
-/*	Get the note from 'noteNameTable' array
-*
-*	Not all values would be set up in this array, so
-*	if index is appropriate to NULL value, we use this funtion
-*	to find the nearest note to this index
-*/
-
-//global var for the curent note
-char* curent_note;
-
-char* get_nearest_note(int index) {
-	
-	int up_index = index + 1;
-	int down_index = index - 1;
-	char* note = 0x0000;
-	curent_note = new char[2];
-
-	while (!note) {
-		if (up_index < FFT_LEN - 1) {
-			if (noteNameTable[up_index++])
-				note = noteNameTable[up_index-1];
-			else if (down_index >= 0) {
-				if (noteNameTable[down_index--])
-					note = noteNameTable[down_index+1];
-			}
-		}
-		else
-			return (char*)"#";
-	}
-	curent_note = note;
-}
-
+//GLOBALS
+int sample_rate;
+int asio_buffer_length;
 
 void GraphInit(){
 	//resize window (it doesn't work as I expected, but it's ok )
@@ -209,8 +137,7 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 
 
 
-void main() {		
-
+void main() {
 	//Init
 	setlocale(LC_ALL, "Rus");	
 	if ( ! BASS_Init(-1, 44100, 0, 0, NULL)) {
@@ -222,17 +149,22 @@ void main() {
 		cout << "BASSASIO ERROR: " << BASS_ASIO_ErrorGetCode() << endl;
 		system("pause");
 		return;
-	}	
+	}		
 
+	//Set GLOBALS
 	BASS_ASIO_GetInfo(&info);
-	GraphInit();	//init graph's settings	
-	set_notes();	//init arrays with notes
+	sample_rate = BASS_ASIO_GetRate();
+	asio_buffer_length = info.bufpref;
+
+	//initialization
+	GraphInit();				//init graph's settings	
+	Anal->init_note_arrays();	//init arrays with notes
 
 	//set streams 
-	left_channel_stream = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0 );
-	right_channel_stream = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0 );
-	gate_channel = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0);
-	buffer_for_fft = BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0);
+	left_channel_stream		= BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0);
+	right_channel_stream	= BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0);
+	gate_channel			= BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0);
+	buffer_for_fft			= BASS_StreamCreate(BASS_ASIO_GetRate(), 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, 0);
 	
 	//outout channels
 	BASS_ASIO_ChannelEnableBASS(FALSE, 0, left_channel_stream, TRUE);
@@ -245,12 +177,12 @@ void main() {
 	BASS_ASIO_ChannelSetFormat(TRUE, 0, BASS_ASIO_FORMAT_FLOAT);
 
 	BASS_ASIO_Start(0, 0);	//start driver
-	thread visualizationTread(visualization);	//visualization in new thread
+	thread visualization_thread(visualization);	//start visualization in new thread
 	 
 	system("pause");
 	VISUALIZE = FALSE;		//kill the visualization thread
-	visualizationTread.join();
-	BASS_ASIO_Stop();		//stop asio and free buffers
+	visualization_thread.join();	
+	BASS_ASIO_Stop();		
 	BASS_ASIO_Free();
 	return;
 }
