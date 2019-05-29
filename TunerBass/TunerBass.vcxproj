@@ -123,6 +123,7 @@
     <ClCompile Include="Analize.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Smoothiner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Bassasio\c\bassasio.lib" />
@@ -134,6 +135,7 @@
     <ClInclude Include="Graph_config.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="ProcConfig.h" />
+    <ClInclude Include="Smoothiner.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

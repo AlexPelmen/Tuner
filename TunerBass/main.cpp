@@ -45,8 +45,9 @@ float *gate_buffer					= new float[FFT_LEN / 2];	//buffer for gated signal
 float *frequency_response_buffer	= new float[FFT_LEN / 2];	//frequency response buffer	
 
 //GLOBALS
-int sample_rate;
-int asio_buffer_length;
+int gl_sample_rate;
+int gl_asio_buffer_length;
+bool VISUALIZE = 1;		//output graphs or not
 
 void GraphInit(){
 	//resize window (it doesn't work as I expected, but it's ok )
@@ -57,7 +58,7 @@ void GraphInit(){
 	MoveWindow(hwnd, 0, 0, 620, 600, TRUE); 
 
 	Graph->set_asio_buffer_length( (int)info.bufpref*0.80 );	//set buffer length for signal graph
-	Anal->set_buffer_length(FFT_LEN/2);					//the same for analizing class
+	gl_asio_buffer_length = FFT_LEN / 2;
 }
 
 
@@ -65,17 +66,13 @@ void GraphInit(){
 //read from frequency_responce_buffer fft then returns the name of the note
 void freq_res_proc() {
 	if (frequency_response_buffer) {
-		int index = Anal->get_maximum_index(frequency_response_buffer);
-		char* curent_note = noteNameTable[index];
-		if (!curent_note)				//means that maximum is somewhere between notes
-			get_nearest_note(index);
-
+		char note[3];
+		Anal->get_current_note(frequency_response_buffer, note);
+		if (note){
+			system("cls");
+			cout << note << endl;
+		}
 	}
-	if (curent_note) {
-		system("cls");
-		printf("%s", curent_note);
-	}
-
 }
 
 //Thread to output the graph
@@ -153,8 +150,8 @@ void main() {
 
 	//Set GLOBALS
 	BASS_ASIO_GetInfo(&info);
-	sample_rate = BASS_ASIO_GetRate();
-	asio_buffer_length = info.bufpref;
+	gl_sample_rate = BASS_ASIO_GetRate();
+	gl_asio_buffer_length = info.bufpref;
 
 	//initialization
 	GraphInit();				//init graph's settings	

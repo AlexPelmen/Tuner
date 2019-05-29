@@ -1,11 +1,50 @@
+//
+//	Declaration of functions from `Analize` class
+//
+
+
 #include "Analize.h"
+#include <string.h>
 #include <cmath>
 
 extern int gl_sample_rate;
 extern int gl_asio_buffer_length;
+const char * NOTES[] = { "C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B " };	//Names of the notes
 
-//this method starts in the init function
-//it's needed to fill array noreNameTable
+
+
+//Constructor: allocates memory and initialize note arrays
+Analize::Analize()
+{
+	init_note_arrays();
+}
+
+
+
+//Analize fft and gets the playing note
+//
+//	float fft - frequency response
+//	char* out - string, where the name of playing note would be written
+//
+
+void Analize::get_current_note( float* fft, char* out )
+{	
+	int index = get_maximum_index(fft);
+	if (index < 10) {
+		out[0] = '\0';	//set empty string
+		return;
+	}
+	char* note = note_name_table[index];
+	if (!note) {		//means that maximum is somewhere between notes
+		note = new char[3];
+		get_nearest_note(index, note);
+	}
+	strcpy_s( out, 3, note );
+}
+
+
+
+//it's needed to fill array note_name_table
 void Analize::init_note_arrays() {
 
 	//normalize
@@ -14,10 +53,9 @@ void Analize::init_note_arrays() {
 
 	//init arrays with default values
 	for (int i = 0; i<FFT_LEN; ++i) {
-		noteNameTable[i] = 0;
-		notePitchTable[i] = -1;
+		note_name_table[i] = 0;
+		note_pitch_table[i] = -1;
 	}
-
 	//magic
 	for (int i = 0; i<127; ++i) {
 		float pitch = (440.0 / 32.0) * pow(2, (i - 9.0) / 12.0);
@@ -32,20 +70,27 @@ void Analize::init_note_arrays() {
 				index = j;
 			}
 		}
-		noteNameTable[index] = (char*)NOTES[i % 12];
-		notePitchTable[index] = pitch;
+		note_name_table[index] = (char*)NOTES[i % 12];
+		note_pitch_table[index] = pitch;
 	}
 }
 
-int Analize::get_maximum_index(float * sample){
+
+
+
+//gets index of the highest peak from fft
+//
+//	float*	fft - frequency response
+//
+int Analize::get_maximum_index(float * fft ){
 
 	if (!gl_asio_buffer_length) return -1;	//err
 
 	float cur_max = 0;
 	int cur_index_of_max = 0;
 	for (int i = 0; i < gl_asio_buffer_length / 2; i++) {
-		if (cur_max < sample[i]) {
-			cur_max = sample[i];
+		if (cur_max < fft[i]) {
+			cur_max = fft[i];
 			cur_index_of_max = i;
 		}
 	}
@@ -53,24 +98,30 @@ int Analize::get_maximum_index(float * sample){
 }
 
 
-char * Analize::get_nearest_note(int index)
+
+
+//gets the nearest note to the current index form note_name_table
+//
+//	int index - the current index in the note_name_table_array
+//	char* out - string, where the name of the note would be written
+//
+char * Analize::get_nearest_note(int index, char* out )
 {
 	int up_index = index + 1;
 	int down_index = index - 1;
 	char* note = 0x0000;
-	current_note = new char[2];
 
 	while (!note) {
 		if (up_index < FFT_LEN - 1) {
-			if (noteNameTable[up_index++])
-				note = noteNameTable[up_index - 1];
+			if (note_name_table[up_index++])
+				note = note_name_table[up_index - 1];
 			else if (down_index >= 0) {
-				if (noteNameTable[down_index--])
-					note = noteNameTable[down_index + 1];
+				if (note_name_table[down_index--])
+					note = note_name_table[down_index + 1];
 			}
 		}
 		else
 			return (char*)"#";
 	}
-	current_note = note;
+	strcpy_s(out, 3, note);
 }

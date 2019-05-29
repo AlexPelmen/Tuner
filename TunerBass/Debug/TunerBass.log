@@ -1,19 +1,15 @@
-﻿  graph.cpp
-c:\users\pelmen\source\repos\tuner\tunerbass\graph.cpp(30): warning C4244: =: преобразование "int" в "float", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\graph.cpp(65): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\graph.cpp(68): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\graph.cpp(69): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\graph.cpp(83): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+﻿  Analize.cpp
+c:\users\pelmen\source\repos\tuner\tunerbass\analize.cpp(61): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
   main.cpp
 c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(11): warning C4067: непредвиденные лексемы за директивой препроцессора, требуется newline
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(63): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(73): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(131): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(212): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(232): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(233): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(234): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(235): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(60): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(137): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(153): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(161): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(162): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(163): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(164): warning C4244: аргумент: преобразование "double" в "DWORD", возможна потеря данных
+  Smoothiner.cpp
   Создание кода...
-c:\users\pelmen\source\repos\tuner\tunerbass\main.cpp(120): warning C4715: get_nearest_note: значение возвращается не при всех путях выполнения
+c:\users\pelmen\source\repos\tuner\tunerbass\analize.cpp(127): warning C4715: Analize::get_nearest_note: значение возвращается не при всех путях выполнения
   TunerBass.vcxproj -> C:\Users\Pelmen\source\repos\Tuner\Debug\TunerBass.exe
