@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "../Bass/c/bass.h"
-#include "../Bassasio/c/bassasio.h"
+#include "bass.h"
+#include "bassasio.h"
 
 #include "Graph.h"
 #include "Buffer.h"

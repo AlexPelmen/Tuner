@@ -29,18 +29,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\Bass\c\bass.lib">
-      <Filter>Файлы ресурсов</Filter>
-    </Library>
-    <Library Include="..\Bassasio\c\bassasio.lib">
-      <Filter>Файлы ресурсов</Filter>
-    </Library>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Graph.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Bass\c\bass.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Analize.h">
@@ -55,5 +44,19 @@
     <ClInclude Include="Smoothiner.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="bass.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="bassasio.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\libs\bass.lib">
+      <Filter>Файлы ресурсов</Filter>
+    </Library>
+    <Library Include="..\libs\bassasio.lib">
+      <Filter>Файлы ресурсов</Filter>
+    </Library>
   </ItemGroup>
 </Project>

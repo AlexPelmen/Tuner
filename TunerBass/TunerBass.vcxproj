@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{98F62010-ED03-415E-965E-9D32E5EC30C1}</ProjectGuid>
     <RootNamespace>TunerBass</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -89,7 +89,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Pelmen\source\repos\Tuner_clear\libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>bass.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -126,16 +130,17 @@
     <ClCompile Include="Smoothiner.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\Bassasio\c\bassasio.lib" />
-    <Library Include="..\Bass\c\bass.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Bass\c\bass.h" />
     <ClInclude Include="Analize.h" />
+    <ClInclude Include="bass.h" />
+    <ClInclude Include="bassasio.h" />
     <ClInclude Include="Graph_config.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="ProcConfig.h" />
     <ClInclude Include="Smoothiner.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\libs\bass.lib" />
+    <Library Include="..\libs\bassasio.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
