@@ -3,11 +3,13 @@
 #include <deque>
 
 class Smoothiner{
+public:
+	Smoothiner();
 private:	
 	int current_note;		//CURRENT NOTE 
-	int notes_freq[12];		//how often every note has been met 
+	int notes_freq[13];		//how often every note has been met  (12 notes + 'no sound' )
 
-	std::deque<int> note_history;
+	std::deque<int> note_history;	//deque with some notes 
 
 	void add_note_to_deque(int note_index);
 

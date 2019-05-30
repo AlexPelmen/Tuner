@@ -6,6 +6,7 @@
 #include "Analize.h"
 #include <string.h>
 #include <cmath>
+#include "Smoothiner.h"
 
 extern int gl_sample_rate;
 extern int gl_asio_buffer_length;
@@ -13,10 +14,11 @@ const char * NOTES[] = { "C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "
 
 
 
-//Constructor: allocates memory and initialize note arrays
+//initialize note arrays
 Analize::Analize()
 {
 	init_note_arrays();
+	Smooth = new Smoothiner();
 }
 
 
@@ -26,20 +28,20 @@ Analize::Analize()
 //	float fft - frequency response
 //	char* out - string, where the name of playing note would be written
 //
-
-void Analize::get_current_note( float* fft, char* out )
-{	
+char* Analize::get_current_note( float* fft )
+{
 	int index = get_maximum_index(fft);
 	if (index < 10) {
-		out[0] = '\0';	//set empty string
-		return;
+		return (char*)"";
 	}
-	char* note = note_name_table[index];
-	if (!note) {		//means that maximum is somewhere between notes
-		note = new char[3];
-		get_nearest_note(index, note);
+	int note = note_indexes_table[index];
+	if ( note == -1 ) {		//means that maximum is somewhere between notes
+		note = get_nearest_note(index);
 	}
-	strcpy_s( out, 3, note );
+	Smooth->add_note( note );
+	char* note_name = Smooth->get_note();
+	
+	return note_name;
 }
 
 
@@ -53,7 +55,7 @@ void Analize::init_note_arrays() {
 
 	//init arrays with default values
 	for (int i = 0; i<FFT_LEN; ++i) {
-		note_name_table[i] = 0;
+		note_indexes_table[i] = -1;
 		note_pitch_table[i] = -1;
 	}
 	//magic
@@ -70,7 +72,7 @@ void Analize::init_note_arrays() {
 				index = j;
 			}
 		}
-		note_name_table[index] = (char*)NOTES[i % 12];
+		note_indexes_table[index] = i%12;
 		note_pitch_table[index] = pitch;
 	}
 }
@@ -103,25 +105,25 @@ int Analize::get_maximum_index(float * fft ){
 //gets the nearest note to the current index form note_name_table
 //
 //	int index - the current index in the note_name_table_array
-//	char* out - string, where the name of the note would be written
-//
-char * Analize::get_nearest_note(int index, char* out )
+//	
+//	returns index of the note
+int Analize::get_nearest_note(int index )
 {
 	int up_index = index + 1;
 	int down_index = index - 1;
-	char* note = 0x0000;
+	int note = -1;
 
-	while (!note) {
+	while ( note == -1 ) {
 		if (up_index < FFT_LEN - 1) {
-			if (note_name_table[up_index++])
-				note = note_name_table[up_index - 1];
+			if (note_indexes_table[up_index++])
+				note = note_indexes_table[up_index - 1];
 			else if (down_index >= 0) {
-				if (note_name_table[down_index--])
-					note = note_name_table[down_index + 1];
+				if (note_indexes_table[down_index--])
+					note = note_indexes_table[down_index + 1];
 			}
 		}
 		else
-			return (char*)"#";
+			return -1;
 	}
-	strcpy_s(out, 3, note);
+	return note;
 }

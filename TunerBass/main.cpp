@@ -66,9 +66,8 @@ void GraphInit(){
 //read from frequency_responce_buffer fft then returns the name of the note
 void freq_res_proc() {
 	if (frequency_response_buffer) {
-		char note[3];
-		Anal->get_current_note(frequency_response_buffer, note);
-		if (note){
+		char* note = Anal->get_current_note(frequency_response_buffer );
+		if (note[0] != '\0' ){	//not empty
 			system("cls");
 			cout << note << endl;
 		}
