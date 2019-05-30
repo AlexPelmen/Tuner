@@ -126,6 +126,7 @@
   <ItemGroup>
     <ClCompile Include="Analize.cpp" />
     <ClCompile Include="graph.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Smoothiner.cpp" />
   </ItemGroup>
@@ -135,6 +136,7 @@
     <ClInclude Include="bassasio.h" />
     <ClInclude Include="Graph_config.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="ProcConfig.h" />
     <ClInclude Include="Smoothiner.h" />
   </ItemGroup>

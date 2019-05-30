@@ -28,7 +28,7 @@ Analize::Analize()
 //	float fft - frequency response
 //	char* out - string, where the name of playing note would be written
 //
-char* Analize::get_current_note( float* fft )
+char* Analize::get_current_note_from_fft( float* fft )
 {
 	int index = get_maximum_index(fft);
 	if (index < 10) {
@@ -40,14 +40,18 @@ char* Analize::get_current_note( float* fft )
 	}
 	Smooth->add_note( note );
 	char* note_name = Smooth->get_note();
-	
+	current_note = note_name;
+
 	return note_name;
 }
 
 
 
 //it's needed to fill array note_name_table
-void Analize::init_note_arrays() {
+void Analize::init_note_arrays() 
+{
+	float note_pitch_table[FFT_LEN];		//array of pitches
+	float freqTable[FFT_LEN];				//array of frequencies as they appropriate fft-spectre
 
 	//normalize
 	for (int i = 0; i<FFT_LEN; ++i)
@@ -126,4 +130,11 @@ int Analize::get_nearest_note(int index )
 			return -1;
 	}
 	return note;
+}
+
+
+
+//Returns current_note
+char* Analize::get_note() {
+	return current_note;
 }

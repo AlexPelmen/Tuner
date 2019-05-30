@@ -62,35 +62,45 @@ void GraphInit(){
 }
 
 
+//THREADS
 //Thread to process fft
 //read from frequency_responce_buffer fft then returns the name of the note
-void freq_res_proc() {
-	if (frequency_response_buffer) {
-		char* note = Anal->get_current_note(frequency_response_buffer );
-		if (note[0] != '\0' ){	//not empty
-			system("cls");
-			cout << note << endl;
-		}
+void freq_res_proc() {	
+	Anal->get_current_note_from_fft(frequency_response_buffer );	
+}
+void signal_graph_proc() {
+	Graph->clear();				//paint it black
+	Graph->draw_axis();			//draw coordinate plane	
+	Graph->draw_sample((float*)signal_graph_buffer, 0);
+}
+void fft_graph_proc() {
+	//frequency response graph
+	FreqResGraph->clear();
+	FreqResGraph->draw_axis();
+	FreqResGraph->set_asio_buffer_length(FFT_LEN / 4);
+	FreqResGraph->draw_sample(frequency_response_buffer, 0);
+}
+void note_output_proc() {
+	char* note = Anal->get_note();
+	if (note && note[0] != '\0') {	//is not empty
+		system("cls");
+		cout << note << endl;
 	}
 }
+
 
 //Thread to output the graph
 //It works every 
 void visualization(){
 	while (VISUALIZE) {
-		//signal's graph 
-		Graph->clear();				//paint it black
-		Graph->draw_axis();			//draw coordinate plane	
-		Graph->draw_sample((float*)signal_graph_buffer, 0 );
-							
-		//frequency response graph
-		FreqResGraph->clear();
-		FreqResGraph->draw_axis();
-		FreqResGraph->set_asio_buffer_length(FFT_LEN /4);
-		FreqResGraph->draw_sample(frequency_response_buffer, 0 );
+		thread signal_response_thread(signal_graph_proc);	//fft thread
+		signal_response_thread.detach();
 
-		thread frequency_response_proc(freq_res_proc);	//fft thread
-		frequency_response_proc.detach();
+		thread fft_response_thread(fft_graph_proc);	//fft thread
+		fft_response_thread.detach();
+
+		thread note_output_thread(note_output_proc);	//fft thread
+		note_output_thread.detach();
 
 		//pause
 		this_thread::sleep_for(chrono::milliseconds( VISUALIZATION_PAUSE ));
@@ -122,8 +132,14 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 	DWORD fftlen = min( length, 1024 * 2 * 2 ); // limit the data to the amount required by the FFT (1024 samples)
 	BASS_StreamPutData(gate_channel, buffer, fftlen);	//get signal
 	filter_gate(fftlen);								//Gate
-	BASS_ChannelGetData(buffer_for_fft, frequency_response_buffer, BASS_DATA_FFT8192);	//FFT
+	
+	if (frequency_response_buffer) {
+		BASS_ChannelGetData(buffer_for_fft, frequency_response_buffer, BASS_DATA_FFT8192);	//FFT
+	}
 
+	thread frequency_response_proc(freq_res_proc);	//fft thread
+	frequency_response_proc.detach();
+	
 	BASS_StreamPutData(left_channel_stream, buffer, fftlen );	//send signal to left headphone 
 	BASS_StreamPutData(right_channel_stream, buffer, fftlen );	//send signal to right headphone
 
