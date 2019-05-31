@@ -7,6 +7,9 @@
 #include <string.h>
 #include <cmath>
 #include "Smoothiner.h"
+#include "Logger.h"
+
+Logger logger;
 
 extern int gl_sample_rate;
 extern int gl_asio_buffer_length;
@@ -41,6 +44,9 @@ char* Analize::get_current_note_from_fft( float* fft )
 	Smooth->add_note( note );
 	char* note_name = Smooth->get_note();
 	current_note = note_name;
+
+	logger.log_note(note_name);
+	logger.log_fft(fft);	
 
 	return note_name;
 }

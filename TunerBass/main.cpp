@@ -93,17 +93,16 @@ void note_output_proc() {
 //It works every 
 void visualization(){
 	while (VISUALIZE) {
-		thread signal_response_thread(signal_graph_proc);	//fft thread
-		signal_response_thread.detach();
-
-		thread fft_response_thread(fft_graph_proc);	//fft thread
-		fft_response_thread.detach();
-
-		thread note_output_thread(note_output_proc);	//fft thread
-		note_output_thread.detach();
+		thread signal_response_thread(signal_graph_proc);
+		thread fft_response_thread(fft_graph_proc);
+		thread note_output_thread(note_output_proc);
 
 		//pause
 		this_thread::sleep_for(chrono::milliseconds( VISUALIZATION_PAUSE ));
+		
+		signal_response_thread.join();
+		fft_response_thread.join();
+		note_output_thread.join();
 	}
 	return;
 }
@@ -133,15 +132,15 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 	BASS_StreamPutData(gate_channel, buffer, fftlen);	//get signal
 	filter_gate(fftlen);								//Gate
 	
-	if (frequency_response_buffer) {
-		BASS_ChannelGetData(buffer_for_fft, frequency_response_buffer, BASS_DATA_FFT8192);	//FFT
-	}
-
-	thread frequency_response_proc(freq_res_proc);	//fft thread
-	frequency_response_proc.detach();
+	BASS_ChannelGetData(buffer_for_fft, frequency_response_buffer, BASS_DATA_FFT8192);	//FFT
 	
 	BASS_StreamPutData(left_channel_stream, buffer, fftlen );	//send signal to left headphone 
 	BASS_StreamPutData(right_channel_stream, buffer, fftlen );	//send signal to right headphone
+
+	if (frequency_response_buffer) {
+		thread frequency_response_proc(freq_res_proc);	//fft thread
+		frequency_response_proc.detach();
+	}
 
 	signal_graph_buffer = buffer;	//don't forget about buffer
 	return length;	
