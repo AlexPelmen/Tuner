@@ -2,7 +2,6 @@
 #include "ProcConfig.h"
 
 
-
 Logger::Logger()
 {
 	fout.open( LOG_FILE );
@@ -30,8 +29,6 @@ void Logger::log_fft(float * fft)
 void Logger::log_note(char * note)
 {
 	lock_file.lock();
-
 	fout << "note: " << note << "\t";
-
 	lock_file.unlock();
 }

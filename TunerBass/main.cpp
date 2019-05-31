@@ -49,18 +49,17 @@ int gl_sample_rate;
 int gl_asio_buffer_length;
 bool VISUALIZE = 1;		//output graphs or not
 
+
 void GraphInit(){
 	//resize window (it doesn't work as I expected, but it's ok )
-	HWND hwnd;
 	char Title[1024];
 	GetConsoleTitle(Title, 1024);
-	hwnd = FindWindow(NULL, Title); 
+	HWND hwnd = FindWindow(NULL, Title); 
 	MoveWindow(hwnd, 0, 0, 620, 600, TRUE); 
 
 	Graph->set_asio_buffer_length( (int)info.bufpref*0.80 );	//set buffer length for signal graph
 	gl_asio_buffer_length = FFT_LEN / 2;
 }
-
 
 //THREADS
 //Thread to process fft
@@ -72,6 +71,12 @@ void signal_graph_proc() {
 	Graph->clear();				//paint it black
 	Graph->draw_axis();			//draw coordinate plane	
 	Graph->draw_sample((float*)signal_graph_buffer, 0);
+
+	//draw text
+	char* note = Anal->get_note();
+	if (note && note[0] != '\0') {	//is not empty
+		Graph->draw_text(0, -30, note, 4);
+	}
 }
 void fft_graph_proc() {
 	//frequency response graph
@@ -81,11 +86,7 @@ void fft_graph_proc() {
 	FreqResGraph->draw_sample(frequency_response_buffer, 0);
 }
 void note_output_proc() {
-	char* note = Anal->get_note();
-	if (note && note[0] != '\0') {	//is not empty
-		system("cls");
-		cout << note << endl;
-	}
+	
 }
 
 

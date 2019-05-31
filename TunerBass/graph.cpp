@@ -84,5 +84,20 @@ void GraphConsole::draw_sample(float * sample, int offset ){
 		if (x*scale > client_width )
 			break;
 	}
+}
+
+
+
+//Outputs text on the screen
+//
+// int x - X coord of this stuff (relative coords depands on up-left corner of the graph)
+// int y - Y coord of this stuff (relative coords depands on up-left corner of the graph)
+// char* text - string you wanna output to the screen
+// int len - number of chars you wanna output
+void GraphConsole::draw_text(int x, int y, char * text, int len)
+{
+	int abs_x = offset_x + padding_x + x;
+	int abs_y = offset_y + padding_y + y;
+	TextOut(hDC, abs_x, abs_y, text, len);
 };
 

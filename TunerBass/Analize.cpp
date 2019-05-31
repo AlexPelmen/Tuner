@@ -46,7 +46,7 @@ char* Analize::get_current_note_from_fft( float* fft )
 	current_note = note_name;
 
 	logger.log_note(note_name);
-	logger.log_fft(fft);	
+	logger.log_fft(fft);
 
 	return note_name;
 }

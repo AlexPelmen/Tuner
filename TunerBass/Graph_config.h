@@ -15,9 +15,9 @@
 
 //offsets
 #define SIGNAL_GRAPH_OFFSET_X	0
-#define SIGNAL_GRAPH_OFFSET_Y	0
+#define SIGNAL_GRAPH_OFFSET_Y	30
 #define FFT_GRAPH_OFFSET_X		0
-#define FFT_GRAPH_OFFSET_Y		300
+#define FFT_GRAPH_OFFSET_Y		330
 
 //paddings
 #define SIGNAL_GRAPH_PADDING_X	20

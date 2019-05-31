@@ -42,4 +42,7 @@ public:
 	void draw_axis();			//draw coordinate plane					
 	void draw_new_point(float x, float y);		//add new point to the graph
 	void draw_sample(float* sample, int offset);	//output sample to the graph
+
+
+	void draw_text(int x, int y, char* text, int len);	//draws text on the screen using WiApi
 };
