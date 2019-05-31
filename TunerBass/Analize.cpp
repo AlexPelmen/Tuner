@@ -45,8 +45,8 @@ char* Analize::get_current_note_from_fft( float* fft )
 	char* note_name = Smooth->get_note();
 	current_note = note_name;
 
-	logger.log_note(note_name);
-	logger.log_fft(fft);
+	/*logger.log_note(note_name);
+	logger.log_fft(fft);*/
 
 	return note_name;
 }

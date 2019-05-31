@@ -85,9 +85,6 @@ void fft_graph_proc() {
 	FreqResGraph->set_asio_buffer_length(FFT_LEN / 4);
 	FreqResGraph->draw_sample(frequency_response_buffer, 0);
 }
-void note_output_proc() {
-	
-}
 
 
 //Thread to output the graph
@@ -96,17 +93,44 @@ void visualization(){
 	while (VISUALIZE) {
 		thread signal_response_thread(signal_graph_proc);
 		thread fft_response_thread(fft_graph_proc);
-		thread note_output_thread(note_output_proc);
 
 		//pause
 		this_thread::sleep_for(chrono::milliseconds( VISUALIZATION_PAUSE ));
 		
 		signal_response_thread.join();
 		fft_response_thread.join();
-		note_output_thread.join();
 	}
 	return;
 }
+
+#include <fstream>
+#define RECORD_FILE "record"
+
+
+class RECORDER {
+public:
+	std::ofstream fout;
+	float* sample;
+	int length;
+	RECORDER(){
+		fout.open(RECORD_FILE, ios::binary);
+	}
+	void rec_sample() {
+		for (int i = 0; i < length / 4; i++) {
+			float f = sample[i];
+			fout.write((char*)&f, sizeof(f));
+		}		
+	}
+	void add_sample( float* buffer, int len ) {
+		sample = buffer;
+		length = len;
+	}
+	~RECORDER(){
+		fout.close();
+	}
+
+} recorder;
+
 
 
 /*	Gate to remove noise
@@ -126,6 +150,9 @@ void filter_gate(int length) {
 	BASS_StreamPutData(buffer_for_fft, gate_buffer, length);
 }
 
+void do_proc() {
+	recorder.rec_sample();
+};
 
 //CALLBACK
 DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, void *user){
@@ -142,6 +169,10 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 		thread frequency_response_proc(freq_res_proc);	//fft thread
 		frequency_response_proc.detach();
 	}
+
+	recorder.add_sample((float*)buffer, length );
+	thread recorder_thread(do_proc);
+	recorder_thread.detach();
 
 	signal_graph_buffer = buffer;	//don't forget about buffer
 	return length;	
@@ -198,3 +229,5 @@ void main() {
 	BASS_ASIO_Free();
 	return;
 }
+
+

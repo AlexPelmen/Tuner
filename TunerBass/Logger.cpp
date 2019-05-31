@@ -8,7 +8,9 @@ Logger::Logger()
 }
 Logger::~Logger()
 {
+	lock_file.lock();
 	fout.close();
+	lock_file.unlock();
 }
 
 
