@@ -1,0 +1,3 @@
+[submodule "YIN/Yin"]
+	path = YIN/Yin
+	url = https://github.com/ashokfernandez/Yin-Pitch-Tracking
