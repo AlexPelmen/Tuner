@@ -44,14 +44,15 @@ HSTREAM buffer_for_fft;			//process fft with this stream
 //Buffers
 void *signal_graph_buffer;										//buffer for signal to output it on screen						
 float *gate_buffer					= new float[FFT_LEN / 2];	//buffer for gated signal
-float *frequency_response_buffer	= new float[FFT_LEN / 2];	//frequency response buffer	
+int16_t* frequency_response_buffer	= new int16_t[FFT_LEN / 2];	//frequency response buffer	
 int16_t *yin_buffer	= new int16_t[FFT_LEN / 2];	//yin_buffer
 
 //GLOBALS
 int gl_sample_rate;
 int gl_asio_buffer_length;
-float* c_buffer;
 bool VISUALIZE = 1;		//output graphs or not
+
+int16_t* c_buffer;
 
 
 void GraphInit(){
@@ -65,7 +66,12 @@ void GraphInit(){
 	gl_asio_buffer_length = FFT_LEN / 2;
 }
 
-int buffer_length;
+
+
+
+
+
+int yin_buffer_length;
 Yin yin;
 float pitch;
 
@@ -73,25 +79,32 @@ float pitch;
 //Thread to process fft
 //read from frequency_responce_buffer fft then returns the name of the note
 void freq_res_proc() {	
-	int16_t* int_buffer = new int16_t[buffer_length/2];
-	//init array
-	for (int i = 0; i < buffer_length/4; i++) {
-		int_buffer[i] = (int16_t)c_buffer[i];
-	}
-	//Anal->get_current_note_from_fft(frequency_response_buffer );	
-	Yin_init(&yin, buffer_length, 0.05);
-	pitch = Yin_getPitch(&yin, int_buffer);
+	//Anal->get_current_note_from_fft(frequency_response_buffer );
+	if (c_buffer) {
+		Yin_init(&yin, yin_buffer_length, 0.05);
+		float p = Yin_getPitch(&yin, c_buffer);
+		if (p != -1)
+			pitch = p;
+	}	
+
 }
+
+
+
+
+
+
+
 void signal_graph_proc() {
 	Graph->clear();				//paint it black
 	Graph->draw_axis();			//draw coordinate plane	
-	Graph->draw_sample((float*)signal_graph_buffer, 0);
+	Graph->draw_sample((int16_t*)signal_graph_buffer, 0);
 
 	//draw text
 	char* note = Anal->get_note();
 	if (pitch) {	//is not empty
 		char freq_char[100];
-		sprintf_s(freq_char, "%10.3f", pitch);
+		sprintf_s(freq_char, "%f", pitch);
 		Graph->draw_text(0, -30, freq_char, 4);
 	}
 }
@@ -109,13 +122,13 @@ void fft_graph_proc() {
 void visualization(){
 	while (VISUALIZE) {
 		thread signal_response_thread(signal_graph_proc);
-		thread fft_response_thread(fft_graph_proc);
+		//thread fft_response_thread(fft_graph_proc);
 
 		//pause
 		this_thread::sleep_for(chrono::milliseconds( VISUALIZATION_PAUSE ));
 		
 		signal_response_thread.join();
-		fft_response_thread.join();
+		//fft_response_thread.join();
 	}
 	return;
 }
@@ -191,9 +204,9 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 	thread recorder_thread(do_proc);
 	recorder_thread.detach();*/
 
-	c_buffer = (float*)buffer;
-	buffer_length = length;
-	signal_graph_buffer = buffer;	//don't forget about buffer
+	c_buffer = (int16_t*)buffer;
+	yin_buffer_length = length;
+	signal_graph_buffer = (int16_t*)buffer;	//don't forget about buffer
 	return length;	
 }
 
@@ -217,7 +230,7 @@ void main() {
 	BASS_ASIO_GetInfo(&info);
 	gl_sample_rate = BASS_ASIO_GetRate();
 	gl_asio_buffer_length = info.bufpref;
-	buffer_length = info.bufpref;
+	yin_buffer_length = info.bufpref;
 
 	//initialization
 	GraphInit();				//init graph's settings	
@@ -232,12 +245,12 @@ void main() {
 	//outout channels
 	BASS_ASIO_ChannelEnableBASS(FALSE, 0, left_channel_stream, TRUE);
 	BASS_ASIO_ChannelEnableBASS(FALSE, 1, right_channel_stream, TRUE);
-	BASS_ASIO_ChannelSetFormat(FALSE, 0, BASS_ASIO_FORMAT_FLOAT);
-	BASS_ASIO_ChannelSetFormat(FALSE, 1, BASS_ASIO_FORMAT_FLOAT);
+	BASS_ASIO_ChannelSetFormat(FALSE, 0, BASS_ASIO_FORMAT_16BIT);
+	BASS_ASIO_ChannelSetFormat(FALSE, 1, BASS_ASIO_FORMAT_16BIT);
 
 	//input channel
 	BASS_ASIO_ChannelEnable(TRUE, 0, inputProc, 0);
-	BASS_ASIO_ChannelSetFormat(TRUE, 0, BASS_ASIO_FORMAT_FLOAT);
+	BASS_ASIO_ChannelSetFormat(TRUE, 0, BASS_ASIO_FORMAT_16BIT);
 
 	BASS_ASIO_Start(0, 0);	//start driver
 	thread visualization_thread(visualization);	//start visualization in new thread

@@ -2,6 +2,8 @@
 #include "Graph.h"
 #include <iostream>
 
+#define MAX_INT16_T 32768
+
 using namespace std;
 
 GraphConsole::GraphConsole( int x, int y, int width, int height, int padding_x, int padding_y, int buffer_length ) {
@@ -61,7 +63,7 @@ void GraphConsole::clear() {
 
 void GraphConsole::draw_new_point(float x, float y) {
 	SelectObject(hDC, WhitePen);
-	float relVal = y / 2;	//it normalized yet
+	float relVal = y / MAX_INT16_T / 2;	//it normalized yet
 	int Y = round( client_height * relVal ); //get val
 
 	//to absolute coords;
@@ -74,12 +76,12 @@ void GraphConsole::draw_new_point(float x, float y) {
 
 
 //output sample to the graph
-void GraphConsole::draw_sample(float * sample, int offset ){
+void GraphConsole::draw_sample(int16_t* sample, int offset ){
 	if (!sample) return;
-	float* p = sample;
+	int16_t* p = sample;
 	int x = 0;
 	for (int i = 0; i < asio_buffer_length; i++) {
-		float val = *p++;
+		int16_t val = *p++;
 		draw_new_point(x++ + offset * asio_buffer_length, val);
 		if (x*scale > client_width )
 			break;
