@@ -2,6 +2,8 @@
 
 #include "bass.h"
 #include "bassasio.h"
+#include "Yin.h"
+#include "Yin.c"
 
 #include "Graph.h"
 #include "Buffer.h"
@@ -43,10 +45,12 @@ HSTREAM buffer_for_fft;			//process fft with this stream
 void *signal_graph_buffer;										//buffer for signal to output it on screen						
 float *gate_buffer					= new float[FFT_LEN / 2];	//buffer for gated signal
 float *frequency_response_buffer	= new float[FFT_LEN / 2];	//frequency response buffer	
+int16_t *yin_buffer	= new int16_t[FFT_LEN / 2];	//yin_buffer
 
 //GLOBALS
 int gl_sample_rate;
 int gl_asio_buffer_length;
+float* c_buffer;
 bool VISUALIZE = 1;		//output graphs or not
 
 
@@ -61,11 +65,22 @@ void GraphInit(){
 	gl_asio_buffer_length = FFT_LEN / 2;
 }
 
+int buffer_length;
+Yin yin;
+float pitch;
+
 //THREADS
 //Thread to process fft
 //read from frequency_responce_buffer fft then returns the name of the note
 void freq_res_proc() {	
-	Anal->get_current_note_from_fft(frequency_response_buffer );	
+	int16_t* int_buffer = new int16_t[buffer_length/2];
+	//init array
+	for (int i = 0; i < buffer_length/4; i++) {
+		int_buffer[i] = (int16_t)c_buffer[i];
+	}
+	//Anal->get_current_note_from_fft(frequency_response_buffer );	
+	Yin_init(&yin, buffer_length, 0.05);
+	pitch = Yin_getPitch(&yin, int_buffer);
 }
 void signal_graph_proc() {
 	Graph->clear();				//paint it black
@@ -74,8 +89,10 @@ void signal_graph_proc() {
 
 	//draw text
 	char* note = Anal->get_note();
-	if (note && note[0] != '\0') {	//is not empty
-		Graph->draw_text(0, -30, note, 4);
+	if (pitch) {	//is not empty
+		char freq_char[100];
+		sprintf_s(freq_char, "%10.3f", pitch);
+		Graph->draw_text(0, -30, freq_char, 4);
 	}
 }
 void fft_graph_proc() {
@@ -160,7 +177,7 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 	BASS_StreamPutData(gate_channel, buffer, fftlen);	//get signal
 	filter_gate(fftlen);								//Gate
 	
-	BASS_ChannelGetData(buffer_for_fft, frequency_response_buffer, BASS_DATA_FFT8192);	//FFT
+	//BASS_ChannelGetData(buffer_for_fft, frequency_response_buffer, BASS_DATA_FFT8192);	//FFT
 	
 	BASS_StreamPutData(left_channel_stream, buffer, fftlen );	//send signal to left headphone 
 	BASS_StreamPutData(right_channel_stream, buffer, fftlen );	//send signal to right headphone
@@ -170,10 +187,12 @@ DWORD CALLBACK inputProc(BOOL input, DWORD channel, void *buffer, DWORD length, 
 		frequency_response_proc.detach();
 	}
 
-	recorder.add_sample((float*)buffer, length );
+	/*recorder.add_sample((float*)buffer, length );
 	thread recorder_thread(do_proc);
-	recorder_thread.detach();
+	recorder_thread.detach();*/
 
+	c_buffer = (float*)buffer;
+	buffer_length = length;
 	signal_graph_buffer = buffer;	//don't forget about buffer
 	return length;	
 }
@@ -198,6 +217,7 @@ void main() {
 	BASS_ASIO_GetInfo(&info);
 	gl_sample_rate = BASS_ASIO_GetRate();
 	gl_asio_buffer_length = info.bufpref;
+	buffer_length = info.bufpref;
 
 	//initialization
 	GraphInit();				//init graph's settings	

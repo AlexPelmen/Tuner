@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Pelmen\source\repos\TunerBass\FFTW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Alex\Desktop\Tuner\YIN\Yin-Pitch-Tracking;C:\Users\Pelmen\source\repos\TunerBass\FFTW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Users\Pelmen\source\repos\TunerBass\FFTW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -124,6 +124,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\YIN\Yin-Pitch-Tracking\Yin.c" />
     <ClCompile Include="Analize.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -131,6 +132,7 @@
     <ClCompile Include="Smoothiner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\YIN\Yin-Pitch-Tracking\Yin.h" />
     <ClInclude Include="Analize.h" />
     <ClInclude Include="bass.h" />
     <ClInclude Include="bassasio.h" />
